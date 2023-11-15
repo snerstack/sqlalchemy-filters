@@ -4,6 +4,13 @@ Release Notes
 Here you can see the full list of changes between sqlalchemy-filters
 versions, where semantic versioning is used: *major.minor.patch*.
 
+0.13.0+rb5
+----------
+
+* fixed: action/checkout version
+* added: filters inet_in, inet_not_in
+
+
 0.13.0+rb4
 ----------
 
