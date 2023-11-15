@@ -4,6 +4,15 @@ Release Notes
 Here you can see the full list of changes between sqlalchemy-filters
 versions, where semantic versioning is used: *major.minor.patch*.
 
+0.13.0+rb4
+----------
+
+* fix: ci
+* fix: filter none entity
+* fix: infer entities from select object (sqlachemy20)
+* added: gitignores and make targets
+* added: filter astext_ilike, astext_not_ilike
+
 0.13.0
 ------
 
