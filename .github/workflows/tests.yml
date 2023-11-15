@@ -60,7 +60,7 @@ jobs:
           - {python: '3.10', tox: "py310-sqlalchemy1.4"}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
