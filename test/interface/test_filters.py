@@ -14,7 +14,7 @@ from sqlalchemy_filters.exceptions import (
 )
 from sqlalchemy_filters.models import sqlalchemy_version_cmp
 
-from test.models import Foo, Bar, Qux, Corge, Grault
+from test.models import Foo, Bar, Qux, Corge, Grault, Garply
 
 
 ARRAY_NOT_SUPPORTED = (
@@ -25,6 +25,9 @@ JSON_NOT_SUPPORTED = (
     "JSON columns not supported until SQLAlchemy 1.4"
 )
 
+INET_NOT_SUPPORTED = (
+    "INET type and operators supported only by PostgreSQL"
+)
 
 STRING_DATE_TIME_NOT_SUPPORTED = (
     "TODO: String Time / DateTime values currently not working as filters by "
@@ -97,6 +100,15 @@ def multiple_graults_inserted(session):
     grault_2 = Grault(id=2, name='name_2', data={"dkey2": 2})
     session.add_all([grault_1, grault_2])
     session.commit()
+
+
+@pytest.fixture
+def multiple_garplys_inserted(session, is_postgresql):
+    if is_postgresql:
+        garply_1 = Garply(id=1, name='name_1', addr='127.1.0.1')
+        garply_2 = Garply(id=2, name='name_2', addr='127.2.0.1')
+        session.add_all([garply_1, garply_2])
+        session.commit()
 
 
 class TestFiltersNotApplied:
@@ -1384,3 +1396,34 @@ class TestSelectObject:
 
         assert len(result) == 1
         assert result[0][0].name == 'name_2'
+
+
+class TestInetFields:
+
+    @pytest.mark.usefixtures('multiple_garplys_inserted')
+    def test_inet_in_filter(self, session, is_postgresql):
+        if not is_postgresql:
+            pytest.skip(INET_NOT_SUPPORTED)
+
+        query = session.query(Garply)
+        filters = [{'field': 'addr', 'op': 'inet_in', 'value': '127.1.0.0/24'}]
+
+        filtered_query = apply_filters(query, filters)
+        result = filtered_query.all()
+
+        assert len(result) == 1
+        assert result[0].addr == '127.1.0.1'
+
+    @pytest.mark.usefixtures('multiple_garplys_inserted')
+    def test_inet_not_in_filter(self, session, is_postgresql):
+        if not is_postgresql:
+            pytest.skip(INET_NOT_SUPPORTED)
+
+        query = session.query(Garply)
+        filters = [{'field': 'addr', 'op': 'inet_not_in', 'value': '127.1.0.0/24'}]
+
+        filtered_query = apply_filters(query, filters)
+        result = filtered_query.all()
+
+        assert len(result) == 1
+        assert result[0].addr == '127.2.0.1'

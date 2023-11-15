@@ -3,7 +3,7 @@
 from sqlalchemy import (
     Column, Date, DateTime, ForeignKey, Integer, JSON, String, Time
 )
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, INET
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.orm import relationship
@@ -70,3 +70,10 @@ class Grault(BaseJSONAwareSqlalchemy):
     __tablename__ = 'grault'
 
     data = Column(JSON)
+
+
+class Garply(BasePostgresqlSpecific):
+
+    __tablename__ = 'garply'
+
+    addr = Column(INET)

@@ -50,6 +50,8 @@ class Operator(object):
         'not_in': lambda f, a: ~f.in_(a),
         'any': lambda f, a: f.any(a),
         'not_any': lambda f, a: func.not_(f.any(a)),
+        'inet_in': lambda f, a: f.op("<<")(a),
+        'inet_not_in': lambda f, a: ~f.op("<<")(a),
     }
 
     def __init__(self, operator=None):
