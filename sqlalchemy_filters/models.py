@@ -84,8 +84,8 @@ def get_query_models(query):
         # or query might be a sqla2.0 select statement
         pass
 
-    # also try to infer the models from various internals
-    for table_tuple in query._setup_joins + query._legacy_setup_joins:
+    # also try to infer the models from internals
+    for table_tuple in query._setup_joins:
         models.append(get_model_from_table(table_tuple[0]))
 
     # also account query.select_from entities
