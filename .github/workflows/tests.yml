@@ -7,7 +7,7 @@ on:
 jobs:
   tests:
     name: ${{ matrix.tox }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     services:
       mariadb:
@@ -37,28 +37,12 @@ jobs:
           # sqlalchemylatest (i.e. > 2.0.0) is not yet supported
           # for any version of python
 
-          # sqlalchemy < 1.1 does not support JSON
-
-          - {python: '3.7', tox: "py37-sqlalchemy1.1"}
-          - {python: '3.7', tox: "py37-sqlalchemy1.2"}
-          - {python: '3.7', tox: "py37-sqlalchemy1.3"}
-          - {python: '3.7', tox: "py37-sqlalchemy1.4"}
-
-          - {python: '3.8', tox: "py38-sqlalchemy1.1"}
-          - {python: '3.8', tox: "py38-sqlalchemy1.2"}
-          - {python: '3.8', tox: "py38-sqlalchemy1.3"}
-          - {python: '3.8', tox: "py38-sqlalchemy1.4"}
-
-          - {python: '3.9', tox: "py39-sqlalchemy1.1"}
-          - {python: '3.9', tox: "py39-sqlalchemy1.2"}
-          - {python: '3.9', tox: "py39-sqlalchemy1.3"}
-          - {python: '3.9', tox: "py39-sqlalchemy1.4"}
-
-          # python3.10 with sqlalchemy <= 1.1 errors with:
-          # AttributeError: module 'collections' has no attribute 'MutableMapping'
-          - {python: '3.10', tox: "py310-sqlalchemy1.2"}
-          - {python: '3.10', tox: "py310-sqlalchemy1.3"}
           - {python: '3.10', tox: "py310-sqlalchemy1.4"}
+
+          - {python: '3.11', tox: "py311-sqlalchemy1.4"}
+
+          - {python: '3.12', tox: "py312-sqlalchemy1.4"}
+
 
     steps:
       - uses: actions/checkout@v4

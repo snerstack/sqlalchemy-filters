@@ -490,8 +490,7 @@ The following RDBMS are supported (tested):
 SQLAlchemy support
 ------------------
 
-The following SQLAlchemy_ versions are supported: ``1.0``, ``1.1``,
-``1.2``, ``1.3``, ``1.4``.
+The following SQLAlchemy_ versions are supported: ``1.4``.
 
 
 Changelog
