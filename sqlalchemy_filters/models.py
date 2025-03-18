@@ -1,6 +1,3 @@
-import operator
-
-from sqlalchemy import __version__ as sqlalchemy_version
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm import mapperlib
 from sqlalchemy.inspection import inspect
@@ -8,16 +5,6 @@ from sqlalchemy.util import symbol
 import types
 
 from .exceptions import BadQuery, FieldNotFound, BadSpec
-
-
-def sqlalchemy_version_cmp(op, version):
-    """compares sqla version < version"""
-
-    ops = {'<': operator.lt, '>=': operator.ge}
-    return ops[op](
-        tuple(sqlalchemy_version.split('.')),
-        tuple(version.split('.'))
-    )
 
 
 class Field(object):
@@ -64,7 +51,7 @@ def _is_hybrid_method(orm_descriptor):
     return orm_descriptor.extension_type == symbol('HYBRID_METHOD')
 
 
-def get_model_from_table(table):  # pragma: no_cover_sqlalchemy_lt_1_4
+def get_model_from_table(table):
     """Resolve model class from table object"""
 
     for registry in mapperlib._all_registries():
@@ -74,7 +61,7 @@ def get_model_from_table(table):  # pragma: no_cover_sqlalchemy_lt_1_4
     return None
 
 
-def get_query_models(query):  # pragma: nocover
+def get_query_models(query):
     """Get models from query.
 
     :param query:
@@ -86,33 +73,24 @@ def get_query_models(query):  # pragma: nocover
     models = [col_desc['entity'] for col_desc in query.column_descriptions]
 
     # account joined entities
-    if sqlalchemy_version_cmp('<', '1.4'):
-        models.extend(mapper.class_ for mapper in query._join_entities)
-    else:
-        try:
-            models.extend(
-                mapper.class_
-                for mapper
-                in query._compile_state()._join_entities
-            )
-        except (InvalidRequestError, AttributeError):
-            # query might not contain columns yet, hence cannot be compiled
-            # or query might be a sqla2.0 select statement
-            pass
-        # also try to infer the models from various internals
-        for table_tuple in query._setup_joins + query._legacy_setup_joins:
-            models.append(get_model_from_table(table_tuple[0]))
+    try:
+        models.extend(
+            mapper.class_
+            for mapper
+            in query._compile_state()._join_entities
+        )
+    except (InvalidRequestError, AttributeError):
+        # query might not contain columns yet, hence cannot be compiled
+        # or query might be a sqla2.0 select statement
+        pass
 
-    # account also query.select_from entities
-    if sqlalchemy_version_cmp('<', '1.1'):  # sqla 1.0
-        if query._select_from_entity:
-            models.append(query._select_from_entity)
-    elif sqlalchemy_version_cmp('<', '1.4'):  # sqla 1.1-1.3
-        if query._select_from_entity:
-            models.append(query._select_from_entity.class_)
-    else:  # sqla 1.4
-        if query._from_obj:
-            models.append(get_model_from_table(query._from_obj[0]))
+    # also try to infer the models from various internals
+    for table_tuple in query._setup_joins + query._legacy_setup_joins:
+        models.append(get_model_from_table(table_tuple[0]))
+
+    # also account query.select_from entities
+    if query._from_obj:
+        models.append(get_model_from_table(query._from_obj[0]))
 
     return {model.__name__: model for model in models if model is not None}
 
@@ -191,21 +169,14 @@ def auto_join(query, *model_names):
     # every model has access to the registry, so we can use any from the query
     query_models = get_query_models(query).values()
     last_model = list(query_models)[-1]
-    model_registry = (
-        last_model._decl_class_registry
-        if sqlalchemy_version_cmp('<', '1.4')
-        else last_model.registry._class_registry
-    )
+    model_registry = last_model.registry._class_registry
 
     for name in model_names:
         model = get_model_class_by_name(model_registry, name)
         if model and (model not in get_query_models(query).values()):
             try:
                 tmp = query.join(model)
-                if (
-                    sqlalchemy_version_cmp('>=', '1.4')
-                    and hasattr(tmp, '_compile_state')
-                ):  # pragma: nocover
+                if hasattr(tmp, '_compile_state'):  # pragma: nocover
                     # https://docs.sqlalchemy.org/en/14/changelog/migration_14.html
                     # Many Core and ORM statement objects now perform much of
                     # their construction and validation in the compile phase

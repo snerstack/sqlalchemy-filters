@@ -25,7 +25,6 @@ class Base(object):
 
 Base = declarative_base(cls=Base)
 BasePostgresqlSpecific = declarative_base(cls=Base)
-BaseJSONAwareSqlalchemy = declarative_base(cls=Base)
 
 
 class Foo(Base):
@@ -58,18 +57,18 @@ class Qux(Base):
     expiration_time = Column(Time)
 
 
+class Grault(Base):
+
+    __tablename__ = 'grault'
+
+    data = Column(JSON)
+
+
 class Corge(BasePostgresqlSpecific):
 
     __tablename__ = 'corge'
 
     tags = Column(ARRAY(String, dimensions=1))
-
-
-class Grault(BaseJSONAwareSqlalchemy):
-
-    __tablename__ = 'grault'
-
-    data = Column(JSON)
 
 
 class Garply(BasePostgresqlSpecific):

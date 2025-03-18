@@ -5,9 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import create_database, drop_database, database_exists
 
-from sqlalchemy_filters.models import sqlalchemy_version_cmp
-
-from test.models import Base, BasePostgresqlSpecific, BaseJSONAwareSqlalchemy
+from test.models import Base, BasePostgresqlSpecific
 
 
 SQLITE_TEST_DB_URI = 'SQLITE_TEST_DB_URI'
@@ -130,9 +128,6 @@ def connection(db_uri, db_engine_options, is_postgresql):
     if is_postgresql:
         BasePostgresqlSpecific.metadata.create_all(engine)
         BasePostgresqlSpecific.metadata.bind = engine
-    if sqlalchemy_version_cmp('>=', '1.3'):
-        BaseJSONAwareSqlalchemy.metadata.create_all(engine)
-        BaseJSONAwareSqlalchemy.metadata.bind = engine
 
     yield connection
 
@@ -151,9 +146,6 @@ def session(connection, is_postgresql):
         db_session.execute(table.delete())
     if is_postgresql:
         for table in reversed(BasePostgresqlSpecific.metadata.sorted_tables):
-            db_session.execute(table.delete())
-    if sqlalchemy_version_cmp('>=', '1.3'):
-        for table in reversed(BaseJSONAwareSqlalchemy.metadata.sorted_tables):
             db_session.execute(table.delete())
 
     db_session.commit()

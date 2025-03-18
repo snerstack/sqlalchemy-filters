@@ -12,7 +12,6 @@ from sqlalchemy_filters import apply_filters
 from sqlalchemy_filters.exceptions import (
     BadFilterFormat, BadSpec, FieldNotFound
 )
-from sqlalchemy_filters.models import sqlalchemy_version_cmp
 
 from test.models import Foo, Bar, Qux, Corge, Grault, Garply
 
@@ -711,7 +710,6 @@ class TestApplyNotILikeFilter:
 
 class TestApplyAsTextILikeFilter:
 
-    @pytest.mark.skipif(sqlalchemy_version_cmp('<', '1.3'), reason=JSON_NOT_SUPPORTED)
     @pytest.mark.usefixtures('multiple_graults_inserted')
     def test_one_filter_applied_to_a_single_model(self, session):
         query = session.query(Grault)
@@ -726,7 +724,6 @@ class TestApplyAsTextILikeFilter:
 
 class TestApplyAsTextNotILikeFilter:
 
-    @pytest.mark.skipif(sqlalchemy_version_cmp('<', '1.3'), reason=JSON_NOT_SUPPORTED)
     @pytest.mark.usefixtures('multiple_graults_inserted')
     def test_one_filter_applied_to_a_single_model(self, session):
         query = session.query(Grault)
@@ -1378,9 +1375,6 @@ class TestSelectObject:
 
     @pytest.mark.usefixtures('multiple_foos_inserted')
     def test_filter_on_select(self, session):
-        if sqlalchemy_version_cmp('<', '1.4'):
-            pytest.skip("Sqlalchemy select style 2.0 not supported")
-
         query = select(Foo)
         filters = [
             {
