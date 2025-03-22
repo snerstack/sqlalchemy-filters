@@ -182,8 +182,8 @@ class TestAutoJoin:
 
         expected = (
             "SELECT "
-            "foo.id AS foo_id, foo.name AS foo_name, "
-            "foo.count AS foo_count, foo.bar_id AS foo_bar_id \n"
+            "foo.bar_id AS foo_bar_id, "
+            "foo.id AS foo_id, foo.name AS foo_name, foo.count AS foo_count \n"
             "FROM foo {join} bar ON bar.id = foo.bar_id".format(join=join_type)
         )
         assert str(query) == expected
@@ -194,8 +194,8 @@ class TestAutoJoin:
         # no join applied
         expected = (
             "SELECT "
-            "foo.id AS foo_id, foo.name AS foo_name, "
-            "foo.count AS foo_count, foo.bar_id AS foo_bar_id, "
+            "foo.bar_id AS foo_bar_id, "
+            "foo.id AS foo_id, foo.name AS foo_name, foo.count AS foo_count, "
             "bar.id AS bar_id, bar.name AS bar_name, bar.count AS bar_count \n"
             "FROM foo, bar"
         )
@@ -211,8 +211,8 @@ class TestAutoJoin:
 
         expected = (
             "SELECT "
-            "foo.id AS foo_id, foo.name AS foo_name, "
-            "foo.count AS foo_count, foo.bar_id AS foo_bar_id \n"
+            "foo.bar_id AS foo_bar_id, "
+            "foo.id AS foo_id, foo.name AS foo_name, foo.count AS foo_count \n"
             "FROM foo {join} bar ON bar.id = foo.bar_id".format(join=join_type)
         )
         assert str(query) == expected
@@ -227,18 +227,19 @@ class TestAutoJoin:
 
         expected_eager = (
             "SELECT "
-            "foo.id AS foo_id, foo.name AS foo_name, "
-            "foo.count AS foo_count, foo.bar_id AS foo_bar_id, "
+            "foo.bar_id AS foo_bar_id, "
+            "foo.id AS foo_id, foo.name AS foo_name, foo.count AS foo_count, "
             "bar_1.id AS bar_1_id, bar_1.name AS bar_1_name, "
             "bar_1.count AS bar_1_count \n"
             "FROM foo LEFT OUTER JOIN bar AS bar_1 ON bar_1.id = foo.bar_id"
         )
+
         assert str(query) == expected_eager
 
         expected_joined = (
             "SELECT "
-            "foo.id AS foo_id, foo.name AS foo_name, "
-            "foo.count AS foo_count, foo.bar_id AS foo_bar_id, "
+            "foo.bar_id AS foo_bar_id, "
+            "foo.id AS foo_id, foo.name AS foo_name, foo.count AS foo_count, "
             "bar_1.id AS bar_1_id, bar_1.name AS bar_1_name, "
             "bar_1.count AS bar_1_count \n"
             "FROM foo {join} bar ON bar.id = foo.bar_id "
@@ -255,8 +256,9 @@ class TestAutoJoin:
 
         expected = (
             "SELECT "
+            "foo.bar_id AS foo_bar_id, "
             "foo.id AS foo_id, foo.name AS foo_name, "
-            "foo.count AS foo_count, foo.bar_id AS foo_bar_id \n"
+            "foo.count AS foo_count \n"
             "FROM foo"
         )
         assert str(query) == expected
