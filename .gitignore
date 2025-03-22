@@ -12,3 +12,6 @@ dist/
 .coverage.*
 .cache
 .tox
+
+# Local development
+venv/
