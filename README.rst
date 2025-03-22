@@ -6,18 +6,15 @@ SQLAlchemy filters
     Filter, sort and paginate SQLAlchemy query objects. Ideal for
     exposing these actions over a REST API.
 
+.. image:: https://github.com/snerstack/sqlalchemy-filters/actions/workflows/tests.yml/badge.svg
+    :target: https://github.com/snerstack/sqlalchemy-filters/actions
 
-.. image:: https://img.shields.io/pypi/v/sqlalchemy-filters.svg
-    :target: https://pypi.org/project/sqlalchemy-filters/
+This is fork of https://github.com/juliotrigo/sqlalchemy-filters and has only limited capabilities:
 
-.. image:: https://img.shields.io/pypi/pyversions/sqlalchemy-filters.svg
-    :target: https://pypi.org/project/sqlalchemy-filters/
-
-.. image:: https://img.shields.io/pypi/format/sqlalchemy-filters.svg
-    :target: https://pypi.org/project/sqlalchemy-filters/
-
-.. image:: https://github.com/juliotrigo/sqlalchemy-filters/actions/workflows/tests.yml/badge.svg
-    :target: https://github.com/juliotrigo/sqlalchemy-filters/actions
+* only sqlalchemy >= 2.0 supported
+* removed all restricted loads capabilities
+* added filters `inet_in`, `inet_not_in` (INET columns filtering with CIDR)
+* added operators `astext_ilike`, `astext_not_ilike` (naive filtering on JSON columns)
 
 
 Filtering
@@ -159,83 +156,6 @@ You can filter by a `hybrid attribute`_: a `hybrid property`_ or a `hybrid metho
 
     filtered_query = apply_filters(query, filter_spec)
     result = filtered_query.all()
-
-
-Restricted Loads
-----------------
-
-You can restrict the fields that SQLAlchemy_ loads from the database by
-using the ``apply_loads`` function:
-
-.. code-block:: python
-
-    query = session.query(Foo, Bar).join(Bar)
-    load_spec = [
-        {'model': 'Foo', 'fields': ['name']},
-        {'model': 'Bar', 'fields': ['count']}
-    ]
-    query = apply_loads(query, load_spec)  # will load only Foo.name and Bar.count
-
-
-The effect of the ``apply_loads`` function is to ``_defer_`` the load
-of any other fields to when/if they're accessed, rather than loading
-them when the query is executed. It only applies to fields that would be
-loaded during normal query execution.
-
-
-Effect on joined queries
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-The default SQLAlchemy_ join is lazy, meaning that columns from the
-joined table are loaded only when required. Therefore ``apply_loads``
-has limited effect in the following scenario:
-
-.. code-block:: python
-
-    query = session.query(Foo).join(Bar)
-    load_spec = [
-        {'model': 'Foo', 'fields': ['name']}
-        {'model': 'Bar', 'fields': ['count']}  # ignored
-    ]
-    query = apply_loads(query, load_spec)  # will load only Foo.name
-
-
-``apply_loads`` cannot be applied to columns that are loaded as
-`joined eager loads <http://docs.sqlalchemy.org/en/latest/orm/loading_relationships.html#joined-eager-loading>`_.
-This is because a joined eager load does not add the joined model to the
-original query, as explained
-`here <http://docs.sqlalchemy.org/en/latest/orm/loading_relationships.html#the-zen-of-joined-eager-loading>`_
-
-The following would not prevent all columns from ``Bar`` being eagerly
-loaded:
-
-.. code-block:: python
-
-    query = session.query(Foo).options(joinedload(Foo.bar))
-    load_spec = [
-        {'model': 'Foo', 'fields': ['name']}
-        {'model': 'Bar', 'fields': ['count']}
-    ]
-    query = apply_loads(query, load_spec)
-
-.. sidebar:: Automatic Join
-
-    In fact, what happens here is that ``Bar`` is automatically joined
-    to ``query``, because it is determined that ``Bar`` is not part of
-    the original query. The ``load_spec`` therefore has no effect
-    because the automatic join results in lazy evaluation.
-
-If you wish to perform a joined load with restricted columns, you must
-specify the columns as part of the joined load, rather than with
-``apply_loads``:
-
-.. code-block:: python
-
-    query = session.query(Foo).options(joinedload(Bar).load_only('count'))
-    load_spec = [
-        {'model': 'Foo', 'fields': ['name']}
-    ]
-    query = apply_loads(query. load_spec)  # will load ony Foo.name and Bar.count
 
 
 Sort
@@ -490,24 +410,24 @@ The following RDBMS are supported (tested):
 SQLAlchemy support
 ------------------
 
-The following SQLAlchemy_ versions are supported: ``1.4``.
+The following SQLAlchemy_ versions are supported: ``2.0``.
 
 
 Changelog
 ---------
 
-Consult the `CHANGELOG <https://github.com/juliotrigo/sqlalchemy-filters/blob/master/CHANGELOG.rst>`_
+Consult the `CHANGELOG <https://github.com/snerstack/sqlalchemy-filters/blob/master/CHANGELOG.rst>`_
 document for fixes and enhancements of each version.
 
 
 License
 -------
 
-Apache 2.0. See `LICENSE <https://github.com/juliotrigo/sqlalchemy-filters/blob/master/LICENSE>`_
+Apache 2.0. See `LICENSE <https://github.com/snerstacks/sqlalchemy-filters/blob/master/LICENSE>`_
 for details.
 
 
 .. _SQLAlchemy: https://www.sqlalchemy.org/
-.. _hybrid attribute: https://docs.sqlalchemy.org/en/13/orm/extensions/hybrid.html
-.. _hybrid property: https://docs.sqlalchemy.org/en/13/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property
-.. _hybrid method: https://docs.sqlalchemy.org/en/13/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_method
+.. _hybrid attribute: https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html
+.. _hybrid property: https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_property
+.. _hybrid method: https://docs.sqlalchemy.org/en/20/orm/extensions/hybrid.html#sqlalchemy.ext.hybrid.hybrid_method
